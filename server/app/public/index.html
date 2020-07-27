@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/index.css" />
+
+
+</head>
+
+<body >
+	
+
+	<!-- 用户信息栏 -->
+	<!-- <div class="topbar">
+		<div class="userinfo_btn">
+			<span id="username"></span><img id="cardimg" src=""></img>
+			<div class="dropmune" id="dropmune">
+				<button onclick="loginOut()">退出登陆</button>
+				<a href="http://localhost:8090/public/login.html">切换新用户</a>
+			</div>
+		</div>
+	</div> -->
+	<div class="h1">
+		<div class="dropmune" id="dropmune">
+			<button onclick="loginOut()">退出登陆</button>
+			<a href="http://localhost:8090/public/login.html">切换新用户</a>
+		</div>
+		首页
+		<div class="myinfo"><span id="username"></span><img id="cardimg" src=""></img></div>
+	</div>
+
+
+
+	<!-- 商品展示栏 -->
+	<div class="box">
+
+	</div>
+
+
+
+	<!-- 购物车 -->
+	<div class="carbtn" id="carbtn">
+		购物车
+	</div>
+</body>
+
+<script type="text/javascript">
+	// 请求用户信息
+	axios.get("http://localhost:8090/getUserinfo")
+		.then((response) => {
+			// console.log(response)
+			if (response.data.code == 4001) {
+				username.innerHTML = '<a href="http://localhost:8090/public/login.html">请登录</a>'
+				dropmune.style.display = "none"
+				carbtn.style.display = "none"
+			} else if (response.data.code == 2000) {
+				username.innerHTML = response.data.info[0].username;
+				cardimg.src = response.data.info[0].cardimg;
+				dropmune.style.display = "block"
+				carbtn.style.display = "block"
+			}
+		})
+
+
+	// 退出登陆--清除缓存--刷新当前页面
+	function loginOut() {
+		axios.get("http://localhost:8090/loginOut") //清除缓存
+			.then(() => {
+				window.location.href = "http://localhost:8090/public/index.html" //刷新
+			})
+	}
+
+
+	// 请求商品数据
+	let url = "http://localhost:8090/home_goods";
+
+	axios.get(url)
+		.then((response) => {
+			// 展示商品
+			for (let i = 0; i < response.data.length; i++) {
+				var goodbox = document.createElement("div");
+				goodbox.className = "goodbox";
+
+				var img1 = document.createElement("img")
+				img1.src = response.data[i].img;
+
+
+				var title = document.createElement("p")
+				title.innerHTML = response.data[i].title;
+
+				var price = document.createElement("p")
+				price.innerHTML = response.data[i].price;
+
+				var car = document.createElement("button")
+				car.innerHTML = "添加到购物车";
+
+				let gcount = 0;
+
+				car.onclick = function () {
+					// 1.把gid给后端，后端根据uid，作关联表的信息录入
+					// console.log(response.data[i].gid)
+					// 点击的次数作为商品数量
+
+					gcount++;
+
+
+					// console.log(gcount)
+					axios("http://localhost:8090/setcar", {
+							params: {
+								gid: response.data[i].gid,
+								gcount: gcount,
+
+							}
+						})
+						.then((response) => {
+							// console.log(response)
+							if (response.data.code == 2000) {
+								alert(response.data.info)
+							} else if (response.data.code == 4001) {
+								alert(response.data.info)
+							}
+						})
+
+				}
+
+				document.querySelector(".box").appendChild(goodbox);
+				goodbox.appendChild(img1);
+				goodbox.appendChild(title);
+				goodbox.appendChild(price);
+
+				goodbox.appendChild(car);
+
+			}
+		})
+
+
+
+	//操作购物车
+	carbtn.onclick = function () {
+		window.location.href = "http://localhost:8090/public/car.html";
+		// console.log("ok")
+	}
+</script>
+
+</html>

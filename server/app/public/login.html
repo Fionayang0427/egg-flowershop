@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+		<link rel="stylesheet" href="./css/login.css">
+	</head>
+	<body>
+		<h1>登陆页面</h1>
+		<div id="mylogin">
+			邮箱：<input type="email" name="email" id="email" value="" /><br>
+			密码：<input type="password" name="passw" id="passw" value="" /><br>
+			<button type="button" onclick="login()">登陆</button>
+		</div>
+
+
+
+
+		<script type="text/javascript">
+			// window.location.href
+			// http://localhost:8090/public/login.html?email=4594577@qq.com&passw=123
+			var str=window.location.href.split("?")[1];
+			// 用户从注册跳转来
+			if(str){
+				var arr=str.split("&");
+				var obj={};
+				for(let i=0;i<arr.length;i++){
+					// 填入
+					obj[arr[i].split("=")[0]] =arr[i].split("=")[1]
+				}
+				email.value=obj.email;
+				passw.value=obj.passw;
+			}
+			
+			
+			// 登陆
+			function login(){
+				axios.post("http://localhost:8090/login",{email:email.value,passw:passw.value})
+				.then(function(response){
+					if(response.data.code==2000){//登陆成功
+						alert(response.data.info)
+						window.location.href="http://localhost:8090/public/index.html"
+					}else if(response.data.code==4001){//登陆失败
+						alert(response.data.info)
+					}
+				})
+			}
+		</script>
+		
+	</body>
+</html>

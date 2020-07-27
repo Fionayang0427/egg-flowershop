@@ -1,0 +1,70 @@
+body{
+    background-image: url(../img/p6.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: floralwhite;
+}
+h1{
+    color: black;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.box {
+    width: 1300px;
+    position: relative;
+    margin: 20px auto;
+    /* background-color: #d2ddd6; */
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.goodbox {
+    width: 400px;
+    height: 400px;
+    /* background-color: pink; */
+    display: table-cell;
+    text-align: center;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    /* background-color:#ccc; */
+    
+}
+.goodbox:hover{
+    /* background-color:#ccc; */
+    
+    box-shadow: 0 0 10px #999;
+}
+
+.goodbox img {
+    margin-top: 10px;
+    width: 300px;
+    height: 300px;
+    left: 50px;
+}
+
+.goodbox p {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+
+}
+
+
+.pay {
+    /* width: 200px; */
+    width: 40px;
+    height: 100%;
+    background-color: rgba(240, 240, 240, 0.74);
+    border-radius: 5px;
+    position: fixed;
+    right: 2px;
+    bottom: 2px;
+    color: black;
+    text-align: center;
+    font-weight: 900;
+    /* font-size: 20px; */
+   
+}

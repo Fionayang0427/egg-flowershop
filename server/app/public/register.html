@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+	<link rel="stylesheet" href="./css/register.css">
+
+	<style>
+		
+	</style>
+
+</head>
+
+<body>
+
+	<!-- <span id="uploadImg">
+		<input type="file" id="file" size="1">
+		<a href="#">上传图片</a>
+	</span> -->
+
+	<h1 class="h1">注册页面</h1>
+	<div id="myregister">
+		<input type="" name="username" id="username" value="" placeholder="昵称" /><br>
+		<input type="email" name="email" id="email" value="" placeholder="邮箱" /><span id="warning"
+			style="display: none;">*该邮箱已被注册</span><br>
+		<input type="password" name="passw" id="passw" value="" placeholder="密码" /><br>
+		<span id="uploadImg"><input type="file" name="cardimg" id="cardimg" placeholder="cardimg"  onchange="changepic(this)"/><a href="#">点击上传头像</a></span> <img src="" id="show"><br>
+		<input type="text" name="verif" id="verif" value="" placeholder="验证码" /><span id="verifbtn"
+			onclick="restverif()"></span><br>
+		<button type="button" onclick="register()">注册</button>
+	</div>
+</body>
+<script type="text/javascript">
+	console.log(document.querySelector("#cardimg"))
+	//点击刷新验证码
+	function restverif() {
+		let url = "http://localhost:8090/getverif"
+		axios.get(url, {withCredentials: true})
+			.then((result) => {
+				// console.log(result)
+				verifbtn.innerHTML = result.data.data; //替换新的验证码
+			})
+	};
+	restverif(); //页面刷新时自动加载一次验证码
+
+	//注册按钮提交
+	async function register() {
+		let url = "http://localhost:8090/register"
+		// 模拟表单
+		var data = new FormData();
+		// "username","email","passw","cardimg","verif"
+		data.append("username", username.value);
+		data.append("email", email.value);
+		data.append("passw", passw.value);
+		data.append("cardimg", cardimg.files[0]);
+		data.append("verif", verif.value);
+		var config = {header: {"Content-Type": "multipart/form-data"},withCredentials: true}
+		let result = await axios.post(url, data, config);
+		// console.log(result);
+		// 判断注册情况（验证码，邮箱。。）
+		if (result.data.code == 4001) { // "验证码错误"
+			restverif();
+			document.getElementById("verif").style.backgroundColor = "red"
+			alert(result.data.info)
+		} else if (result.data.code == 4002) {
+			document.getElementById("warning").style.display = "inline-block";
+			document.getElementById("warning").style.color = "red";
+			alert(result.data.info)
+		} else { //注册成功---重定向
+			window.location.href = `http://localhost:8090/public/login.html?email=${email.value}&passw=${passw.value}`
+		}
+	}
+
+	function changepic() {
+
+var reads= new FileReader();
+
+f=document.getElementById('cardimg').files[0];
+
+reads.readAsDataURL(f);
+
+reads.onload=function (e) {
+
+	document.getElementById('show').src=this.result;
+
+};
+
+}
+</script>
+
+</html>

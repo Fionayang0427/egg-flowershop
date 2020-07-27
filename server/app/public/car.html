@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+	<link rel="stylesheet" href="./css/car.css">
+</head>
+
+<body>
+	<h1>购物车页面</h1>
+
+	<div class="box" id="box"></div>
+	<div class="pay" id="pay">去支付，总价:</div>
+
+
+</body>
+<script type="text/javascript">
+	//请求car表中的商品进行展示
+
+	axios("http://localhost:8090/getcar")
+		.then((response) => {
+			// console.log(response)
+			if (response.data.code == 2000) {
+
+				showcar(response.data.info); //调用展示数据
+
+			} else if (response.data.code == 4001) {
+				alert(response.data.info);
+			}
+		})
+
+
+
+
+
+
+	// 展示数据
+	function showcar(arr) {
+		var pricetotal = 0;
+		for (let i = 0; i < arr.result.length; i++) {
+			let goodbox = document.createElement("div");
+			goodbox.className = "goodbox";
+
+			let img1 = document.createElement("img")
+			img1.src = arr.result[i].img;
+
+
+			let title = document.createElement("p")
+			title.innerHTML = arr.result[i].title;
+			title.className = "title";
+
+			let price = document.createElement("p");
+			price.innerHTML = arr.result[i].price;
+			price.className = "price"
+
+			// 商品个数
+			let num = document.createElement("span");
+			num.innerHTML = arr.carr[i].gcount;
+			num.className = "num"
+			// let newnum = parseInt(num.innerHTML)
+			let newnum = arr.carr[i].gcount
+			pricetotal += arr.result[i].price * parseInt(num.innerHTML);
+
+
+
+
+			let addbtn = document.createElement("button");
+			addbtn.innerHTML = "+"
+			addbtn.className = "addbtn"
+			addbtn.onclick = function () {
+				newnum++;
+				console.log(newnum)
+
+				axios("http://localhost:8090/setcar", {
+						params: {
+							gid: arr.carr[i].gid,
+							gcount: newnum,
+							flag: 1
+						}
+					})
+					.then((response) => {
+						// num.innerHTML = newnum;
+						// num.innerHTML = arr.carr[i].gcount;
+						num.innerHTML++;
+
+						pricetotal += arr.result[i].price;
+						pay.innerHTML = "去支付，总价:" + pricetotal
+					})
+
+				// location.reload();
+			}
+
+
+
+			let jianbtn = document.createElement("button");
+			jianbtn.innerHTML = "-"
+			jianbtn.className = "addbtn"
+			jianbtn.onclick = function () {
+				newnum--;
+				console.log(newnum)
+				if (newnum >= 1) {
+					axios("http://localhost:8090/setcar", {
+							params: {
+								gid: arr.carr[i].gid,
+								gcount: newnum,
+								flag: 2
+							}
+						})
+						.then((response) => {
+							// num.innerHTML = newnum;
+							// num.innerHTML = arr.carr[i].gcount;
+
+							num.innerHTML--;
+							pricetotal -= arr.result[i].price;
+
+
+							pay.innerHTML = "去支付，总价:" + pricetotal
+
+						})
+				} else {
+					num.innerHTML = 1
+					alert("不能再少啦")
+					location.reload();
+				}
+
+
+
+
+			}
+
+			box.appendChild(goodbox)
+			goodbox.appendChild(img1)
+			goodbox.appendChild(title)
+			goodbox.appendChild(price)
+
+			goodbox.appendChild(addbtn)
+			goodbox.appendChild(num)
+			goodbox.appendChild(jianbtn)
+
+
+		}
+		pay.innerHTML += pricetotal
+	}
+
+
+	// 支付
+	pay.onclick = function () {
+		Date.prototype.Format = function (fmt) { // author: meizz
+			var o = {
+				"M+": this.getMonth() + 1, // 月份
+				"d+": this.getDate(), // 日
+				"h+": this.getHours(), // 小时
+				"m+": this.getMinutes(), // 分
+				"s+": this.getSeconds(), // 秒
+				"q+": Math.floor((this.getMonth() + 3) / 3), // 季度
+				"S": this.getMilliseconds() // 毫秒
+			};
+			if (/(y+)/.test(fmt))
+				fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+			for (var k in o)
+				if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[
+						k]) :
+					(("00" + o[k]).substr(("" + o[k]).length)));
+			return fmt;
+		}
+		let time = new Date().Format("yyyy-M-d h:mm:ss");
+
+
+		// 1.把信息全部上传给自己的服务器
+		// 2.后端提交数据做支付
+		// 3.返回支付的情况展示出来
+		var allarr = []
+
+		// 所有商品放数组，所有属性放对象
+		// console.log(document.querySelectorAll(".goodbox")[0].children[1])
+		var garr = document.querySelectorAll(".goodbox")
+		// 操作每个盒子
+		for (let i = 0; i < garr.length; i++) {
+			// console.log(garr[i]);
+			var nodearr = garr[i].children
+			var obj = {}
+			obj.src = nodearr[0].src
+			obj.title = nodearr[1].innerHTML;
+			obj.price = nodearr[2].innerHTML;
+			obj.gcount = nodearr[4].innerHTML;
+			obj.otime = time;
+			allarr.push(obj)
+
+		}
+		console.log(allarr)
+
+
+		axios.post("http://localhost:8090/setorder", allarr, {
+				traditional: true
+			})
+			.then((response) => {
+
+				if (confirm("支付成功，是否跳转到订单页面")) {
+					window.location.href = "http://localhost:8090/public/order.html";
+				} else {
+					location.reload();
+
+				}
+
+
+
+
+
+			})
+
+		//清空当前用户购物车数据
+		axios.get("http://localhost:8090/setcar", {
+				params: {
+					flag: 3
+				}
+			})
+			.then((response) => {
+
+			})
+
+	}
+</script>
+
+</html>
